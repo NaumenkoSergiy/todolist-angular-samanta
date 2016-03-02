@@ -1,0 +1,5 @@
+- flash.each do |key, value|
+  - if value.present?
+    div class="alert alert-#{key}"
+      button.close data-dismiss='alert' ×
+      = value

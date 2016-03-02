@@ -1,0 +1,33 @@
+$loading-bar-color: #337ab7;
+body {
+  padding: 20px 0 0;
+  background: #ba680e asset-url('bg-body.png') repeat-x 0 0;
+  position: relative;
+}
+
+textarea {
+  resize: none;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+#loading-bar .bar {
+  background: $loading-bar-color;
+  height: 6px;
+}
+
+#loading-bar-spinner .spinner-icon {
+  border-top-color:  $loading-bar-color;
+  border-left-color: $loading-bar-color;
+}
+
+.alert-alert { @extend .alert-danger; }
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+

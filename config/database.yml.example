@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  pool: 5
+  timeout: 5000
+  encoding: utf8
+  port: 5432
+  username: username
+  password: password
+
+development:
+  <<: *default
+  database: todolist_development
+
+staging:
+  <<: *default
+  database: todolist_staging
+
+production:
+  <<: *default
+  database: todolist
+
+test:
+  <<: *default
+  database: todolist_test

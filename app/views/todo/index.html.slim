@@ -1,0 +1,189 @@
+.project-controller data-ng-controller='projectCtrl as projectCtrl'
+  .projects data-ng-repeat='project in projectCtrl.projects'
+
+    .project
+      .project-header data-hoverable=''
+
+        .project-field
+          .project-error data-ng-show='project.errors.length'
+            .error data-ng-repeat='error in project.errors' {{ error | capitalize }}
+
+          h2 data-ng-if='!project.editing'
+            | {{project.name}}
+
+          form.project-form name='project.form' data-ng-if='project.editing' novalidate=''
+            input.project-name-field [
+              name='name'
+              type='text'
+              autocomplete='off'
+              required=''
+              data-ng-model='project.name'
+              data-ng-enter='projectCtrl.save(project)'
+              data-ng-blur='projectCtrl.save(project)'
+              data-escapable='projectCtrl.cancel(project)'
+              data-auto-focus='' ]
+
+        .control
+          ul.project-control
+            li: a.edit.edit-project href='' data-ng-click='projectCtrl.edit(project)'
+            li: a.delete.delete-project [
+              href=''
+              data-ng-confirm-click='projectCtrl.delete(project)'
+              data-ng-confirm-message='Do you want to remove this project?' ]
+
+      .task-controller data-ng-controller='taskCtrl as taskCtrl'
+        .create-task-header data-ng-if='project.id'
+
+          form.create-task-form name='project.task_form'
+            .create-task-in.input-group
+              .task-error data-ng-show='errors.length'
+                .error data-ng-repeat='error in errors' {{ error | capitalize }}
+
+              input.create-task-name-field.form-control [
+                name='task_name'
+                type='text'
+                autocomplete='off'
+                required=''
+                data-ng-model='project.task_name'
+                data-ng-enter='taskCtrl.add(project)'
+                placeholder='Start typing here to create a task...' ]
+
+              .input-group-btn
+                a.add-task.btn.btn-success [
+                  href=''
+                  data-ng-disabled='!project.task_name'
+                  data-ng-click='taskCtrl.add(project)' ] Add task
+
+        .task-list
+          table.tasks
+            tbody data-as-sortable='taskCtrl.dragControlListeners' data-ng-model='project.tasks'
+
+              tr.task-item [
+                data-ng-repeat='task in project.tasks'
+                data-ng-class='{ "active": task.active }'
+                data-as-sortable-item=''
+                data-hoverable='' ]
+
+                td.task-status
+                  input [
+                    type='checkbox'
+                    name='status'
+                    data-ng-model='task.done'
+                    data-ng-change='taskCtrl.setDone(task)' ]
+
+                td.task-name
+                  .left-border
+                    .task-name-text [
+                      data-ng-if='!task.editing'
+                      data-ng-class='{ "task-done": task.done }'
+                      data-ng-click='taskCtrl.onNameClick(task)' ]
+                        span.label.label-danger.deadline data-ng-if='task.deadline'
+                          ' {{ task.deadline | date: 'MMM d, y h:mm a' }}
+
+                        ' {{task.name}}
+
+                    textarea.task-name-field [
+                      name='name'
+                      rows='1'
+                      data-ng-if='task.editing'
+                      data-ng-model='task.name'
+                      data-ng-enter='taskCtrl.save(task)'
+                      data-ng-blur='taskCtrl.save(task)'
+                      data-escapable='taskCtrl.cancel(task)'
+                      data-elastic=''
+                      data-auto-focus=''
+                      required='' ]
+
+                    .task-error data-ng-show='task.errors.length'
+                      .error data-ng-repeat='error in task.errors' {{ error | capitalize }}
+
+                    .task-body data-ng-show='task.active'
+
+                      .deadline-dropdown.dropdown
+                        button.btn.btn-default.btn-xs.dropdown-toggle.set-deadline [
+                          id='dropdown-{{task.id}}'
+                          data-toggle='dropdown' ]
+
+                          span.glyphicon.glyphicon-time
+                          span data-ng-if='!task.deadline'  Set deadline
+                          span data-ng-if='task.deadline'  Change deadline
+
+                        span data-ng-if='task.deadline'
+                          '  or
+
+                          button.btn.btn-default.btn-xs.cancel-deadline [
+                            type='button'
+                            data-ng-click='taskCtrl.setDeadline(task, null)' ]
+
+                            span.glyphicon.glyphicon-remove
+                            '  Cancel
+
+                        .dropdown-menu
+                          datetimepicker [
+                            data-ng-model='task.deadline'
+                            data-on-set-time='taskCtrl.setDeadline(task, newDate)'
+                            data-datetimepicker-config='{ dropdownSelector: "#dropdown-{{ task.id }}" }' ]
+
+                      .comment-controller data-ng-controller='commentCtrl as commentCtrl'
+                        .comments-list data-ng-if='task.comments.length'
+                          .comment data-ng-repeat='comment in task.comments'
+                            a.comment-delete [
+                              href=''
+                              data-ng-confirm-click='commentCtrl.delete(task, comment)'
+                              data-ng-confirm-message='Do you want to remove this comment?' ] &times;
+
+                            ' {{ comment.text }}
+
+                            ul.attachments data-ng-if='comment.attachments.length'
+                              li data-ng-repeat='attachment in comment.attachments'
+                                span.glyphicon.glyphicon-file
+                                a href='{{attachment.file.url}}' target='_blank' {{attachment.file.name}}
+                                '  ({{attachment.file.size | bytes}})
+
+                        .form-group
+                          textarea.form-control.comment-field [
+                            data-ng-model='task.comment'
+                            name='comment'
+                            rows='3'
+                            data-ng-enter='commentCtrl.add(task)'
+                            placeholder='Start typing here to write comment...' ]
+
+                        .text-right.pull-right
+                          button.btn.btn-success.btn-sm.submit-comment [
+                            data-ng-disabled='!task.comment.length || uploading'
+                            data-ng-click='commentCtrl.add(task)' ] Submit comment
+
+                        button.btn.btn-primary.btn-sm.attach-file [
+                          data-ng-disabled='uploading'
+                          ngf-select=''
+                          ngf-change='upload($files)'
+                          ngf-multiple='true' ] Attach file
+
+                        span.loading data-ng-if='uploading'
+
+                        ul.attachments data-ng-if='attachments.length'
+                          li ng-repeat='attachment in attachments'
+                            span.glyphicon.glyphicon-file
+                            a href='{{attachment.file.url}}' target='_blank' {{attachment.file.name}}
+                            '  ({{attachment.file.size | bytes}})
+                            a href='' data-ng-click='commentCtrl.removeAttachment(attachment)' remove
+
+                td.task-control
+                  .control
+                    ul
+                      li: a.sort.sort-task href='' data-as-sortable-item-handle=''
+                      li: a.edit.edit-task href='' data-ng-click='taskCtrl.edit(task)'
+                      li: a.delete.delete-task [
+                        href=''
+                        data-ng-confirm-click='taskCtrl.delete(task)'
+                        data-ng-confirm-message='Do you want to remove this task?' ]
+
+  .row
+    .col-xs-12.footer
+      a.btn.btn-lg.btn-primary.create-project [
+        href=''
+        data-ng-disabled='editing'
+        data-ng-click='projectCtrl.create()' ]
+
+        span.glyphicon.glyphicon-plus
+        '  Add TODO List
